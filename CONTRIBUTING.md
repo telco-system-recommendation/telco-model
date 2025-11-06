@@ -168,20 +168,6 @@ If your commit introduces a change that will break existing functionality, add a
 Don't ever get stuck\! If you have questions about the code, the workflow, or anything else:
 
 1.  Leave a comment on your **GitHub Issue or Pull Request**.
-2.  Ask in our team's **[Slack/Discord/Teams Channel Name]**.
+2.  Ask in our team's **Whatsapp**.
 
 We are all here to help each other succeed.
-
-```
-
-### 🚀 How to Use This File
-
-1.  **Create the File:** In your repository, create a new file named exactly `CONTRIBUTING.md`.
-2.  **Location:** Place it in the **root** folder of your repository (the same level as your `README.md`).
-3.  **Customize:** Read through it and replace the bracketed `[...]` sections with your project's specific details (like your project name or chat channel).
-4.  **Inform Your Team:** Let your team know this file exists and that it's the new "source of truth" for your workflow.
-
-GitHub will automatically detect this file and show a link to it when a member creates a new Pull Request.
-
-Would you like me to also provide the code for the `pull_request_template.md` file we discussed?
-```
