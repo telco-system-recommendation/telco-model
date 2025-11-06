@@ -1,11 +1,3 @@
-Here is a detailed and clear `CONTRIBUTING.md` template.
-
-This guide is designed to be a "rulebook" for your team. It's built directly from your goal of standardizing branch names and commit messages. It's structured to be a step-by-step guide for new members and a quick reference for everyone else.
-
-You can copy and paste the text below directly into a file named `CONTRIBUTING.md`.
-
------
-
 # How to Contribute to telco
 
 Welcome to the team! We are excited to have you here. To ensure our project is clean, consistent, and easy to manage, we follow a set of contribution guidelines.
