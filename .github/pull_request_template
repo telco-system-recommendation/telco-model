@@ -1,0 +1,16 @@
+## Description
+
+*Please provide a clear description of what this PR does.*
+
+## Related Issue
+
+*Link to the issue this PR is fixing (e.g., "Closes #12")*
+
+---
+
+## Contributor Checklist
+
+- [ ] I have read the `CONTRIBUTING.md` file.
+- [ ] My branch name follows the convention (e.g., `feature/my-new-feature`).
+- [ ] My commit messages follow the Conventional Commits standard (e.g., `feat: Add new button`).
+- [ ] I have tested my changes locally.
