@@ -50,14 +50,14 @@ All new work must be done on a new branch. We use a specific naming convention t
 
 From the `main` branch, create your new branch.
 
-## Make sure you are on the main branch and have the latest code
+#### Make sure you are on the main branch and have the latest code
 
 ```
 git checkout main
 git pull
 ```
 
-## Create your new branch
+#### Create your new branch
 
 for example
 
@@ -77,13 +77,13 @@ git checkout -b type/short-description
 
 Make your code changes. As you save your work, you **must** use our commit message convention. This helps us create automatic changelogs and makes our history readable.
 
-## Add your changed files
+#### Add your changed files
 
 ```
 git add .
 ```
 
-## Commit your changes with a clear message
+#### Commit your changes with a clear message
 
 git commit -m "type: description of your change"
 
