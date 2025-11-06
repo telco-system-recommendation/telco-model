@@ -1,2 +1,1 @@
 # telco-model
-# telco-model
