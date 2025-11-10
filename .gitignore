@@ -1,9 +1,11 @@
-.venv
+venv
 .env
 __pycache__/
 *.pyc
 *.pyo
 *.pyd
 DS_Store
-data/raw/
-data/processed/
+catatan.md
+doc/researchRequirement/researchRequirement.md
+doc/project_plan.md
+doc/user_tracking_flow.md
