@@ -1,0 +1,47 @@
+{
+  "rows": 10000,
+  "cols": 12,
+  "plan_type_dist": "{'Prepaid': 61.08, 'Postpaid': 38.92}",
+  "target_top5": {
+    "count": {
+      "General Offer": 6070,
+      "Device Upgrade Offer": 1502,
+      "Data Booster": 797,
+      "Retention Offer": 761,
+      "Top-up Promo": 370
+    },
+    "pct": {
+      "General Offer": 60.7,
+      "Device Upgrade Offer": 15.02,
+      "Data Booster": 7.97,
+      "Retention Offer": 7.61,
+      "Top-up Promo": 3.7
+    }
+  },
+  "fi_top5": {
+    "feature": {
+      "0": NaN,
+      "1": "monthly_spend",
+      "2": "complaint_count",
+      "3": "device_brand",
+      "4": "pct_video_usage"
+    },
+    "importance": {
+      "0": 0.0,
+      "1": 0.2744864746420534,
+      "2": 0.1772917206084558,
+      "3": 0.1708824326095098,
+      "4": 0.1381309363710475
+    }
+  },
+  "monthly_spend_top_corr": {
+    "avg_data_usage_gb": 0.9017162342193797,
+    "pct_video_usage": 0.011499363321639392,
+    "travel_score": 0.009062418028674378,
+    "sms_freq": -0.007781040958803111,
+    "topup_freq": 0.007018409522088766
+  },
+  "mannwhitney": "{'p_value': np.float64(0.45300630612738235), 'median_postpaid': np.float64(102000.0), 'median_prepaid': np.float64(103000.0)}",
+  "chi_square": "{'p_value': np.float64(0.8783180435599816), 'top_standardized_residuals': {('Vivo', 'Postpaid'): 0.689499956360039, ('Oppo', 'Postpaid'): -0.6548998153171215, ('Vivo', 'Prepaid'): -0.550390773064811, ('Apple', 'Postpaid'): -0.5352356380772286}}",
+  "engineered_cost_medians": "cost_per_gb not present in base df_cleaned only"
+}
