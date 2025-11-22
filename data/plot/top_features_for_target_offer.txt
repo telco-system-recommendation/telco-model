@@ -1,0 +1,12 @@
+Top 10 Features untuk Target Offer:
+
+1. monthly_spend
+2. avg_data_usage_gb
+3. complaint_count
+4. device_brand_Huawei
+5. device_brand_Apple
+6. device_brand_Realme
+7. pct_video_usage
+8. topup_freq
+9. travel_score
+10. device_brand_Xiaomi
