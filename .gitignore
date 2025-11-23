@@ -5,6 +5,7 @@ __pycache__/
 *.pyo
 *.pyd
 DS_Store
+.DS_Store
 catatan.md
 doc/researchRequirement/researchRequirement.md
 doc/project_plan.md
