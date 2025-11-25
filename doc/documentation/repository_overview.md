@@ -73,7 +73,7 @@ Here's a breakdown of the repository structure and the purpose of each folder:
 
 ### Prerequisites
 
-- Python 3.10+ installed.
+- Python 3.8+ installed.
 - Virtual environment recommended (e.g., `python -m venv .venv`).
 - Git for cloning the repository.
 
@@ -81,36 +81,31 @@ Here's a breakdown of the repository structure and the purpose of each folder:
 
 1. **Clone the Repository**:
 
-   ```bash
+   ```
    git clone https://github.com/telco-system-recommendation/telco-model.git
    cd telco-model
    ```
 
-2. **Create Virtual Environment**:
+2. **Install Dependencies**:
 
-   ```bash
-   python3.10 -m venv .venv
+   ```
+   pip install -r requirements.txt
    ```
 
-3. **Activate Virtual Environment**:
+   This installs libraries like pandas, scikit-learn, CatBoost, XGBoost, etc.
 
-   ```bash
+3. **Activate Virtual Environment** (if using):
+
+   ```
    source .venv/bin/activate  # On macOS/Linux
    ```
 
-4. **Install Dependencies**:
-
-   ```bash
-   pip install -r requirements.txt
-   ```
-   This installs libraries like pandas, scikit-learn, CatBoost, XGBoost, etc.
-
-5. **Run the Main Notebook**:
+4. **Run the Main Notebook**:
    - Open `notebook/main.ipynb` in Jupyter Lab or VS Code.
    - Run cells sequentially to preprocess data, train models, and save results.
    - Key outputs: Processed data in `data/processed/`, results in `data/result/`, best model in `model/best_model.onnx`.
 
-6. **Verify Setup**:
+5. **Verify Setup**:
    - Check if `data/raw/data_capstone.csv` exists (this is the input dataset).
    - Run a quick test: Open `notebook/main.ipynb` and execute the first few cells to load data.
 
