@@ -9,11 +9,13 @@ The project uses Python-based machine learning libraries to process data, train 
 ## 2. Project Purpose and Workflow
 
 ### Purpose
+
 - **Predict Customer Offers**: Based on features like monthly spend, data usage, complaint history, and demographics, predict which offer a customer is most likely to accept.
 - **Handle Imbalanced Data**: The dataset has a severe class imbalance (89:1 ratio), so models use techniques like SMOTE for balanced training.
 - **Provide Deployable Models**: Trained models are saved in formats like `.pkl` and `.onnx` for easy integration into production systems.
 
 ### High-Level Workflow
+
 1. **Data Ingestion**: Raw data is loaded from CSV files.
 2. **Preprocessing**: Outlier removal, encoding, scaling, and balancing.
 3. **Exploratory Data Analysis (EDA)**: Visualize distributions, correlations, and feature importance.
@@ -70,24 +72,30 @@ Here's a breakdown of the repository structure and the purpose of each folder:
 ## 4. Getting Started Guide
 
 ### Prerequisites
+
 - Python 3.8+ installed.
 - Virtual environment recommended (e.g., `python -m venv .venv`).
 - Git for cloning the repository.
 
 ### Setup Steps
+
 1. **Clone the Repository**:
+
    ```
    git clone https://github.com/telco-system-recommendation/telco-model.git
    cd telco-model
    ```
 
 2. **Install Dependencies**:
+
    ```
    pip install -r requirements.txt
    ```
+
    This installs libraries like pandas, scikit-learn, CatBoost, XGBoost, etc.
 
 3. **Activate Virtual Environment** (if using):
+
    ```
    source .venv/bin/activate  # On macOS/Linux
    ```
@@ -102,6 +110,7 @@ Here's a breakdown of the repository structure and the purpose of each folder:
    - Run a quick test: Open `notebook/main.ipynb` and execute the first few cells to load data.
 
 ### Common Issues
+
 - **Missing Data**: Ensure `data/raw/data_capstone.csv` is present (not included in repo for privacy).
 - **GPU Issues**: Models default to CPU; MPS (Mac GPU) may not work for all libraries.
 - **Library Conflicts**: Use the virtual environment to avoid conflicts.
@@ -109,6 +118,7 @@ Here's a breakdown of the repository structure and the purpose of each folder:
 ## 5. Testing Guide
 
 ### How to Test the Models
+
 1. **Unit Testing Data Processing**:
    - Run `notebook/preposesingData.ipynb` to verify data cleaning (e.g., outlier removal, encoding).
    - Check outputs in `data/processed/` (e.g., `X_train.npy` should exist).
@@ -125,6 +135,7 @@ Here's a breakdown of the repository structure and the purpose of each folder:
 4. **Integration Testing**:
    - Load the ONNX model in a backend script (e.g., using `onnxruntime`).
    - Example code:
+
      ```python
      import onnxruntime as ort
      import numpy as np
@@ -141,6 +152,7 @@ Here's a breakdown of the repository structure and the purpose of each folder:
      ```
 
 ### Testing Checklist
+
 - [ ] Data loads without errors.
 - [ ] Preprocessing completes (no nulls, scaled features).
 - [ ] Models train without crashes.
@@ -150,17 +162,20 @@ Here's a breakdown of the repository structure and the purpose of each folder:
 ## 6. Integration with Frontend and Backend
 
 ### For Backend Teams
+
 - **Model Usage**: Load the ONNX model (`model/best_model.onnx`) using `onnxruntime` for fast inference in APIs.
 - **Input Format**: Features must be preprocessed (scaled, encoded) like in the notebooks. Use saved scalers (`data/processed/scaler.pkl`).
 - **Output**: Model predicts offer classes (e.g., 0 for "General Offer", 1 for "Voice Bundle"). Map to human-readable labels.
 - **API Example**: Create an endpoint that takes customer features (JSON) and returns predicted offer.
 
 ### For Frontend Teams
+
 - **Understanding Predictions**: The model recommends offers based on user behavior. Display recommendations in the UI (e.g., "Based on your usage, we recommend this offer").
 - **Data Flow**: Frontend collects user data (e.g., via forms), sends to backend API, which uses the model to predict and return results.
 - **No Direct Access**: Don't modify model files; rely on backend for predictions.
 
 ### Key Handover Points
+
 - **Dataset Schema**: Refer to `doc/database_schema.sql` for data structure.
 - **Model Specs**: 10+ features (numeric/categorical), multiclass output.
 - **Performance**: High accuracy (F1 > 0.99), but test on real data for edge cases.

@@ -167,6 +167,7 @@ target_encoded = le_target.fit_transform(target)
 ```
 
 **Target Mapping:**
+
 | Class | Encoded Value |
 |-------|---------------|
 | Data Booster | 0 |
@@ -252,6 +253,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 #### Distribusi Target (Sebelum SMOTE)
 
 **Training Set:**
+
 | Target Offer | Count | Percentage |
 |-------------|-------|------------|
 | General Offer | 4,856 | 60.7% |
@@ -265,6 +267,7 @@ X_train, X_test, y_train, y_test = train_test_split(
 | Voice Bundle | 54 | 0.7% |
 
 **Testing Set:**
+
 | Target Offer | Count | Percentage |
 |-------------|-------|------------|
 | General Offer | 1,214 | 60.7% |
@@ -323,6 +326,7 @@ X_train_balanced, y_train_balanced = smote.fit_resample(X_train, y_train)
 #### Hasil SMOTE
 
 **Distribusi Setelah SMOTE:**
+
 | Target Offer | Before SMOTE | After SMOTE | Synthetic Added |
 |-------------|--------------|-------------|-----------------|
 | General Offer | 4,856 | 4,856 | 0 |
@@ -589,6 +593,7 @@ Untuk imbalanced data (walaupun sudah di-SMOTE), gunakan:
    ```
 
 4. **ROC-AUC (Multi-class)**
+
    ```python
    from sklearn.metrics import roc_auc_score
    auc = roc_auc_score(y_test, y_pred_proba, multi_class='ovr')
