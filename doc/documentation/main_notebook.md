@@ -1,5 +1,3 @@
-Here is the documentation for the main.ipynb notebook and the experimental results.
-
 # Telco Customer Offer Prediction - Experiment Documentation
 
 ## 1. Notebook Overview: main.ipynb

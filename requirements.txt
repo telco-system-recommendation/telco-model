@@ -14,3 +14,4 @@ lightgbm>=4.0
 catboost>=1.1
 tensorflow>=2.12
 keras>=2.12
+onnx>=1.14
