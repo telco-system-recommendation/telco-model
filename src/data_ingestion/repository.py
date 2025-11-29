@@ -1,11 +1,12 @@
 """
 Data Repository - Handles fetching data from various sources
 """
-
-import os
+from typing import Tuple, Optional
+from pathlib import Path
 import pandas as pd
 import numpy as np
-from typing import Tuple, Optional
+from src.config import PROCESSED_DATA_DIR, PREDICTION_BUFFER_PATH
+
 
 
 class DataRepository:
@@ -14,14 +15,14 @@ class DataRepository:
     (CSV, SQL, API, etc.)
     """
     
-    def __init__(self, 
-                 data_buffer_path: str = '../data/retrain/prediction_buffer.csv',
-                 processed_data_dir: str = '../data/processed'):
-        self.data_buffer_path = data_buffer_path
-        self.processed_data_dir = processed_data_dir
+    def __init__(self,
+                 data_buffer_path: Path = PREDICTION_BUFFER_PATH,
+                 processed_data_dir: Path = PROCESSED_DATA_DIR):
+        self.data_buffer_path = Path(data_buffer_path)
+        self.processed_data_dir = Path(processed_data_dir)
         
         # Create buffer directory if not exists
-        os.makedirs(os.path.dirname(data_buffer_path), exist_ok=True)
+        self.data_buffer_path.parent.mkdir(parents=True, exist_ok=True)
     
     def load_original_training_data(self) -> Tuple[np.ndarray, np.ndarray]:
         """
@@ -31,10 +32,10 @@ class DataRepository:
             X_train: Training features
             y_train: Training labels
         """
-        X_path = os.path.join(self.processed_data_dir, 'X_train_original.npy')
-        y_path = os.path.join(self.processed_data_dir, 'y_train_original.npy')
+        X_path = self.processed_data_dir / 'X_train_original.npy'
+        y_path = self.processed_data_dir / 'y_train_original.npy'
         
-        if not os.path.exists(X_path) or not os.path.exists(y_path):
+        if not X_path.exists() or not y_path.exists():
             raise FileNotFoundError(f"Training data not found in {self.processed_data_dir}")
         
         X_train = np.load(X_path)
@@ -49,7 +50,7 @@ class DataRepository:
         Returns:
             DataFrame with logged predictions or None if buffer doesn't exist
         """
-        if not os.path.exists(self.data_buffer_path):
+        if not self.data_buffer_path.exists():
             return None
         
         return pd.read_csv(self.data_buffer_path)
@@ -66,7 +67,7 @@ class DataRepository:
         if true_label is not None:
             df_new['target_offer'] = true_label
         
-        if os.path.exists(self.data_buffer_path):
+        if self.data_buffer_path.exists():
             df_buffer = pd.read_csv(self.data_buffer_path)
             df_buffer = pd.concat([df_buffer, df_new], ignore_index=True)
         else:
@@ -76,8 +77,8 @@ class DataRepository:
     
     def clear_buffer(self):
         """Remove the prediction buffer file"""
-        if os.path.exists(self.data_buffer_path):
-            os.remove(self.data_buffer_path)
+        if self.data_buffer_path.exists():
+            self.data_buffer_path.unlink()
     
     def save_training_data(self, X: np.ndarray, y: np.ndarray):
         """
@@ -87,8 +88,8 @@ class DataRepository:
             X: Training features
             y: Training labels
         """
-        X_path = os.path.join(self.processed_data_dir, 'X_train_original.npy')
-        y_path = os.path.join(self.processed_data_dir, 'y_train_original.npy')
+        X_path = self.processed_data_dir / 'X_train_original.npy'
+        y_path = self.processed_data_dir / 'y_train_original.npy'
         
         np.save(X_path, X)
         np.save(y_path, y)
@@ -102,9 +103,9 @@ class DataRepository:
         """
         import pickle
         
-        scaler_path = os.path.join(self.processed_data_dir, 'scaler.pkl')
-        encoder_path = os.path.join(self.processed_data_dir, 'label_encoder.pkl')
-        features_path = os.path.join(self.processed_data_dir, 'feature_names.pkl')
+        scaler_path = self.processed_data_dir / 'scaler.pkl'
+        encoder_path = self.processed_data_dir / 'label_encoder.pkl'
+        features_path = self.processed_data_dir / 'feature_names.pkl'
         
         with open(scaler_path, 'rb') as f:
             scaler = pickle.load(f)

@@ -4,7 +4,7 @@ Preprocessing Pipeline - Handles all data transformation logic
 
 import pandas as pd
 import numpy as np
-from typing import Tuple, Optional, List
+from typing import Tuple, Optional, List, Dict, Any
 from sklearn.preprocessing import StandardScaler, LabelEncoder
 
 
@@ -37,7 +37,7 @@ class PreprocessingPipeline:
             Cleaned dataframe and target series
         """
         numerical_cols = df.select_dtypes(include=['float64', 'int64']).columns.tolist()
-        mask = pd.Series([True] * len(df))
+        mask = pd.Series(True, index=df.index)
         
         for col in numerical_cols:
             Q1 = df[col].quantile(0.25)
@@ -159,3 +159,14 @@ class PreprocessingPipeline:
             y_encoded = self.encode_target(y)
         
         return X_scaled, y_encoded
+
+    def prepare_inference_features(self, raw_records: List[Dict[str, Any]]) -> np.ndarray:
+        """Convert raw feature dictionaries into scaled numpy arrays for inference."""
+        if not raw_records:
+            raise ValueError("raw_records must contain at least one feature payload")
+        
+        df = pd.DataFrame(raw_records)
+        df = df.drop(columns=['customer_id', 'target_offer'], errors='ignore')
+        df_encoded = self.encode_categorical(df)
+        X_scaled = self.scale_features(df_encoded)
+        return X_scaled

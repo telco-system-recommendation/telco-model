@@ -1,38 +1,46 @@
-"""
-FastAPI application for serving ML model predictions
-Integrated with modular retraining architecture
-"""
+"""FastAPI application for serving ML model predictions and retraining."""
 
-from fastapi import FastAPI, HTTPException
-import onnxruntime as ort
-import numpy as np
+import logging
+import os
 from typing import Optional
-import uvicorn
 
-from app.schemas.model_schemas import PredictRequest, PredictResponse
-from app.services.retraining_service import RetrainingService
+import numpy as np
+import onnxruntime as ort
+import uvicorn
+from fastapi import FastAPI, HTTPException
+from src.schemas.model_schemas import PredictRequest, PredictResponse
+from src.services.retraining_service import RetrainingService
+from src.preprocessing.pipeline import PreprocessingPipeline
+from src.config import MODEL_ONNX_PATH, MODEL_PKL_PATH
 
 # App state
 class AppState:
     def __init__(self):
         self.session: Optional[ort.InferenceSession] = None
         self.retraining_service: Optional[RetrainingService] = None
+        self.preprocessing: Optional[PreprocessingPipeline] = None
 
 app = FastAPI(title="Telco Offer Prediction API", version="2.0.0")
 state = AppState()
+logger = logging.getLogger("telco-model.api")
+if not logger.handlers:
+    logging.basicConfig(level=logging.INFO)
+RETRAIN_THRESHOLD = int(os.getenv("RETRAIN_THRESHOLD", "1000"))
 
 @app.on_event("startup")
 async def startup_event():
     """Load ONNX model and initialize retraining service on startup"""
-    model_path = "../model/best_model.onnx"
+    model_path = str(MODEL_ONNX_PATH)
+    logger.info("Loading ONNX model from %s", model_path)
     state.session = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
+    logger.info("Initializing retraining service (threshold=%s)", RETRAIN_THRESHOLD)
     state.retraining_service = RetrainingService(
-        model_path='../model/best_model.pkl',
-        onnx_path=model_path,
-        retrain_threshold=1000
+        model_path=MODEL_PKL_PATH,
+        onnx_path=MODEL_ONNX_PATH,
+        retrain_threshold=RETRAIN_THRESHOLD
     )
-    print(f"Model loaded from {model_path}")
-    print(f"Retraining service initialized (threshold: 1000 predictions)")
+    state.preprocessing = state.retraining_service.preprocessing
+    logger.info("Startup complete")
 
 
 @app.get("/")
@@ -41,7 +49,6 @@ async def root():
     return {
         "message": "Telco Offer Prediction API",
         "version": "2.0.0",
-        "architecture": "Modular with loose coupling",
         "endpoints": {
             "POST /predict": "Get prediction for customer features",
             "GET /health": "Check API health",
@@ -57,6 +64,7 @@ async def health():
     return {
         "status": "healthy",
         "model_loaded": state.session is not None,
+        "preprocessing_loaded": state.preprocessing is not None,
         "prediction_count": status.get('current_count', 0),
         "model_version": status.get('model_version', 'unknown')
     }
@@ -69,6 +77,22 @@ async def retrain_status():
         raise HTTPException(status_code=503, detail="Retraining service not initialized")
     
     return state.retraining_service.get_status()
+
+def prepare_input_matrix(request: PredictRequest) -> np.ndarray:
+    """Resolve correct feature matrix from scaled inputs or raw feature payloads."""
+    if request.inputs:
+        return np.array(request.inputs, dtype=np.float32)
+    if request.raw_features:
+        pipeline = state.preprocessing or (state.retraining_service.preprocessing if state.retraining_service else None)
+        if pipeline is None:
+            raise HTTPException(status_code=503, detail="Preprocessing pipeline not available")
+        try:
+            features = pipeline.prepare_inference_features(request.raw_features)
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail=str(exc)) from exc
+        return np.asarray(features, dtype=np.float32)
+    raise HTTPException(status_code=400, detail="Either 'inputs' or 'raw_features' must be provided")
+
 
 def seq_map_to_probs(seq_map):
     """Convert sequence map to probability array"""
@@ -95,7 +119,7 @@ async def predict(request: PredictRequest):
     
     try:
         # Prepare input
-        input_data = np.array(request.inputs, dtype=np.float32)
+        input_data = prepare_input_matrix(request)
         input_name = state.session.get_inputs()[0].name
         
         # Run inference
@@ -131,29 +155,28 @@ async def predict(request: PredictRequest):
         
         # Log predictions for retraining (if raw features provided)
         retrain_triggered = False
-        if (request.raw_features is not None and 
-            len(request.raw_features) == len(request.inputs)):
-            
+        if request.raw_features:
+            if len(request.raw_features) != input_data.shape[0]:
+                raise HTTPException(status_code=400, detail="raw_features length must match number of samples")
             for i, features_dict in enumerate(request.raw_features):
                 true_label = None
                 if request.true_labels and i < len(request.true_labels):
                     true_label = request.true_labels[i]
-                
-                # Log prediction and check if retrain triggered
-                triggered = state.retraining_service.log_prediction(features_dict, true_label)
+                triggered = state.retraining_service.log_prediction(features_dict, true_label) if state.retraining_service else False
                 if triggered:
                     retrain_triggered = True
         
         # Reload model if retrain was triggered
         if retrain_triggered:
-            print("🔄 Reloading model after retraining...")
-            model_path = "../model/best_model.onnx"
-            state.session = ort.InferenceSession(model_path, providers=["CPUExecutionProvider"])
-            print("✓ Model reloaded successfully")
+            logger.info("Retrain triggered. Reloading ONNX model")
+            state.session = ort.InferenceSession(str(MODEL_ONNX_PATH), providers=["CPUExecutionProvider"])
+            logger.info("Model reloaded successfully")
         
         # Get current prediction count
-        status = state.retraining_service.get_status()
-        prediction_count = status['current_count']
+        prediction_count = None
+        if state.retraining_service:
+            status = state.retraining_service.get_status()
+            prediction_count = status['current_count']
         
         return PredictResponse(
             labels=labels,
@@ -161,7 +184,10 @@ async def predict(request: PredictRequest):
             prediction_count=prediction_count
         )
         
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.exception("Prediction failed")
         raise HTTPException(status_code=500, detail=f"Prediction failed: {str(e)}")
 
 

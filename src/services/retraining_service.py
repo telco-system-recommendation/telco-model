@@ -5,14 +5,16 @@ This is the GLUE that connects all modules
 
 import numpy as np
 from datetime import datetime
-from typing import Optional, Dict, Any
-from data_ingestion.repository import DataRepository
-from data_ingestion.stats import PredictionCounter
-from preprocessing.pipeline import PreprocessingPipeline
-from training.trainer import ModelTrainer
-from serialization.onnx_exporter import ONNXExporter
-from storage.artifact_manager import ArtifactManager
-from schemas.model_schemas import RetrainResult
+from pathlib import Path
+from typing import Optional, Dict, Any, Union
+from src.data_ingestion.repository import DataRepository
+from src.data_ingestion.stats import PredictionCounter
+from src.preprocessing.pipeline import PreprocessingPipeline
+from src.training.trainer import ModelTrainer
+from src.serialization.onnx_exporter import ONNXExporter
+from src.storage.artifact_manager import ArtifactManager
+from src.schemas.model_schemas import RetrainResult
+from src.config import MODEL_PKL_PATH, MODEL_ONNX_PATH
 
 
 class RetrainingService:
@@ -22,12 +24,12 @@ class RetrainingService:
     """
     
     def __init__(self,
-                 model_path: str = '../model/best_model.pkl',
-                 onnx_path: str = '../model/best_model.onnx',
+                 model_path: Union[str, Path] = MODEL_PKL_PATH,
+                 onnx_path: Union[str, Path] = MODEL_ONNX_PATH,
                  retrain_threshold: int = 1000):
         
-        self.model_path = model_path
-        self.onnx_path = onnx_path
+        self.model_path = Path(model_path)
+        self.onnx_path = Path(onnx_path)
         self.retrain_threshold = retrain_threshold
         
         # Initialize all components
@@ -104,8 +106,8 @@ class RetrainingService:
                     total_samples=len(X_train_original),
                     f1_weighted=0.0,
                     f1_macro=0.0,
-                    model_path=self.model_path,
-                    onnx_path=self.onnx_path
+                    model_path=str(self.model_path),
+                    onnx_path=str(self.onnx_path)
                 )
             
             if 'target_offer' not in df_new.columns:
@@ -118,8 +120,8 @@ class RetrainingService:
                     total_samples=len(X_train_original),
                     f1_weighted=0.0,
                     f1_macro=0.0,
-                    model_path=self.model_path,
-                    onnx_path=self.onnx_path
+                    model_path=str(self.model_path),
+                    onnx_path=str(self.onnx_path)
                 )
             
             print(f"✓ Found {len(df_new)} new samples in buffer")
@@ -138,8 +140,8 @@ class RetrainingService:
                     total_samples=len(X_train_original),
                     f1_weighted=0.0,
                     f1_macro=0.0,
-                    model_path=self.model_path,
-                    onnx_path=self.onnx_path
+                    model_path=str(self.model_path),
+                    onnx_path=str(self.onnx_path)
                 )
             
             print(f"✓ Preprocessed {len(X_new)} valid samples")
@@ -175,7 +177,7 @@ class RetrainingService:
             print("📤 Exporting to ONNX...")
             onnx_success = self.onnx_exporter.export_to_onnx(
                 new_model,
-                self.onnx_path,
+                str(self.onnx_path),
                 self.feature_names
             )
             if onnx_success:
@@ -217,8 +219,8 @@ Classification Report:
                 f1_weighted=metrics['f1_weighted'],
                 f1_macro=metrics['f1_macro'],
                 roc_auc=metrics['roc_auc'],
-                model_path=self.model_path,
-                onnx_path=self.onnx_path
+                model_path=str(self.model_path),
+                onnx_path=str(self.onnx_path)
             )
             
         except Exception as e:
@@ -238,8 +240,8 @@ Error: {str(e)}
                 total_samples=0,
                 f1_weighted=0.0,
                 f1_macro=0.0,
-                model_path=self.model_path,
-                onnx_path=self.onnx_path
+                model_path=str(self.model_path),
+                onnx_path=str(self.onnx_path)
             )
     
     def get_status(self) -> Dict[str, Any]:
