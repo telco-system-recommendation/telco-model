@@ -8,10 +8,10 @@ services:
     container_name: telco-model-api
     ports:
       - "8000:8000"
+    env_file:
+      - .env
     environment:
       - PYTHONUNBUFFERED=1
-      - RETRAIN_THRESHOLD=1000
-      - LOG_LEVEL=INFO
     volumes:
       # Mount data directories for persistence
       - ./data/retrain:/app/data/retrain

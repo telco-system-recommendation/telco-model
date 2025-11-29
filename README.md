@@ -105,12 +105,20 @@ Here's a breakdown of the repository structure and the purpose of each folder:
    ```
    This installs libraries like pandas, scikit-learn, CatBoost, XGBoost, etc.
 
-5. **Run the Main Notebook**:
+5. **Configure Environment Variables**:
+
+   ```bash
+   cp .env.example .env
+   # edit .env with your secrets (Supabase keys, DB URLs, etc.)
+   ```
+   The FastAPI service and Docker Compose read every runtime secret from `.env`, so never commit the populated file—`.gitignore` already keeps it private.
+
+6. **Run the Main Notebook**:
    - Open `notebook/main.ipynb` in Jupyter Lab or VS Code.
    - Run cells sequentially to preprocess data, train models, and save results.
    - Key outputs: Processed data in `data/processed/`, results in `data/result/`, best model in `model/best_model.onnx`.
 
-6. **Verify Setup**:
+7. **Verify Setup**:
    - Check if `data/raw/data_capstone.csv` exists (this is the input dataset).
    - Run a quick test: Open `notebook/main.ipynb` and execute the first few cells to load data.
 
