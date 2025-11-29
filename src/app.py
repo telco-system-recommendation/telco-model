@@ -1,7 +1,6 @@
 """FastAPI application for serving ML model predictions and retraining."""
 
 import logging
-import os
 from typing import Optional
 
 import numpy as np
@@ -11,7 +10,17 @@ from fastapi import FastAPI, HTTPException
 from src.schemas.model_schemas import PredictRequest, PredictResponse
 from src.services.retraining_service import RetrainingService
 from src.preprocessing.pipeline import PreprocessingPipeline
-from src.config import MODEL_ONNX_PATH, MODEL_PKL_PATH
+from src.config import (
+    MODEL_ONNX_PATH,
+    MODEL_PKL_PATH,
+    RETRAIN_THRESHOLD,
+    LOG_LEVEL,
+    LOG_FORMAT,
+    AUTO_RETRAIN_ENABLED,
+    API_HOST,
+    API_PORT,
+    API_WORKERS,
+)
 
 # App state
 class AppState:
@@ -20,12 +29,21 @@ class AppState:
         self.retraining_service: Optional[RetrainingService] = None
         self.preprocessing: Optional[PreprocessingPipeline] = None
 
+LOG_FORMAT_MAP = {
+    "json": "{\"timestamp\":\"%(asctime)s\",\"level\":\"%(levelname)s\",\"name\":\"%(name)s\",\"message\":\"%(message)s\"}"
+}
+
+def _configure_logging():
+    level = getattr(logging, LOG_LEVEL.upper(), logging.INFO)
+    fmt = LOG_FORMAT_MAP.get(LOG_FORMAT.lower(), "%(asctime)s %(levelname)s [%(name)s] %(message)s")
+    logging.basicConfig(level=level, format=fmt)
+
+
+_configure_logging()
+
 app = FastAPI(title="Telco Offer Prediction API", version="2.0.0")
 state = AppState()
 logger = logging.getLogger("telco-model.api")
-if not logger.handlers:
-    logging.basicConfig(level=logging.INFO)
-RETRAIN_THRESHOLD = int(os.getenv("RETRAIN_THRESHOLD", "1000"))
 
 @app.on_event("startup")
 async def startup_event():
@@ -66,7 +84,8 @@ async def health():
         "model_loaded": state.session is not None,
         "preprocessing_loaded": state.preprocessing is not None,
         "prediction_count": status.get('current_count', 0),
-        "model_version": status.get('model_version', 'unknown')
+        "model_version": status.get('model_version', 'unknown'),
+        "auto_retrain_enabled": AUTO_RETRAIN_ENABLED,
     }
 
 
@@ -158,13 +177,18 @@ async def predict(request: PredictRequest):
         if request.raw_features:
             if len(request.raw_features) != input_data.shape[0]:
                 raise HTTPException(status_code=400, detail="raw_features length must match number of samples")
-            for i, features_dict in enumerate(request.raw_features):
-                true_label = None
-                if request.true_labels and i < len(request.true_labels):
-                    true_label = request.true_labels[i]
-                triggered = state.retraining_service.log_prediction(features_dict, true_label) if state.retraining_service else False
-                if triggered:
-                    retrain_triggered = True
+            if not AUTO_RETRAIN_ENABLED:
+                logger.debug("raw_features provided but AUTO_RETRAIN_ENABLED is false; skipping logging")
+            elif state.retraining_service:
+                for i, features_dict in enumerate(request.raw_features):
+                    true_label = None
+                    if request.true_labels and i < len(request.true_labels):
+                        true_label = request.true_labels[i]
+                    triggered = state.retraining_service.log_prediction(features_dict, true_label)
+                    if triggered:
+                        retrain_triggered = True
+            else:
+                logger.warning("Retraining service unavailable; cannot log raw_features payload")
         
         # Reload model if retrain was triggered
         if retrain_triggered:
@@ -192,4 +216,4 @@ async def predict(request: PredictRequest):
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host=API_HOST, port=API_PORT, workers=API_WORKERS)
