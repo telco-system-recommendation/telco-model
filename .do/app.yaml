@@ -1,0 +1,53 @@
+# DigitalOcean App Platform Specification
+name: telco-model-api
+region: sgp
+
+services:
+  - name: api
+    github:
+      repo: telco-system-recommendation/telco-model
+      branch: feat/fastAPI-implementation
+      deploy_on_push: true
+    
+    dockerfile_path: Dockerfile
+    
+    http_port: 8000
+    
+    instance_count: 1
+    instance_size_slug: professional-xs  # $12/month
+    
+    health_check:
+      http_path: /health
+      initial_delay_seconds: 30
+      period_seconds: 30
+      timeout_seconds: 10
+      success_threshold: 1
+      failure_threshold: 3
+    
+    envs:
+      - key: PYTHONUNBUFFERED
+        value: "1"
+      - key: RETRAIN_THRESHOLD
+        value: "1000"
+      - key: LOG_LEVEL
+        value: "INFO"
+    
+    routes:
+      - path: /
+
+# Optional: Add managed database for production
+# databases:
+#   - name: postgres-db
+#     engine: PG
+#     version: "14"
+#     size: db-s-1vcpu-1gb
+
+# Optional: Add static site for documentation
+# static_sites:
+#   - name: docs
+#     github:
+#       repo: telco-system-recommendation/telco-model
+#       branch: main
+#     output_dir: /doc
+#     routes:
+#       - path: /docs
