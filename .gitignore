@@ -12,7 +12,13 @@ doc/project_plan.md
 doc/user_tracking_flow.md
 doc/panduan_workflow_visualisasi.md
 doc/visualization_diagrams.md
-data/raw/*
-data/processed/*
-model/*
+data/raw/*.csv
+data/processed/*.csv
+data/processed/*.pkl
+data/processed/*.npy
+
+model/*.pkl
+model/*.h5
+model/*.ckpt
+model/*.onnx
 artifacts/*
