@@ -194,4 +194,8 @@ Here's a breakdown of the repository structure and the purpose of each folder:
 - **Performance**: High accuracy (F1 > 0.99), but test on real data for edge cases.
 - **Updates**: If new data arrives, retrain via notebooks and update the ONNX file.
 
+### Link to Model
+[This is an external link to Model](https://www.genome.gov/](https://drive.google.com/drive/folders/1bKy9L7QWFAWkCSW8X9ZGdC0zHn0oG5eH?usp=sharing))
+
+
 For questions, refer to `README.md` or contact the ML team. This setup ensures the ML pipeline is reproducible and integrable.
